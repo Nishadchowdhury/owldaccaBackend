@@ -1,9 +1,11 @@
 const express = require("express");
+
 const fs = require("fs")
 const app = express();
 const cors = require("cors");
-const sendMail = require("./controllers/mailSender");
 const multer = require("multer");
+const Resend = require('resend').Resend;
+
 // const baseURL = "http://localhost:8000";
 const baseURL = "https://server.owldaccabd.com";
 // const corsOption = {
@@ -21,6 +23,48 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/images", express.static("assets/images"));
 
+
+
+//--------------------------------------
+//sending mail
+
+// const resend = new Resend('re_GeB9ZW8z_LrbmCRakt9JueqNzkMHTw1Vg');
+const resend = new Resend('re_R8YPDWtk_6s5dGVUQ4c7B45uEFZw732ah');
+
+app.post("/sendMail", async (req, res) => {
+
+  const { email, html } = req.body;
+  const owner = {
+    email: "owldacca@gmail.com",
+    name: "Owl DaccaBD"
+  }
+
+  try {
+    const data = await resend.emails.send({
+      from: 'Owldacca - Noreply <onboarding@resend.dev>',
+      to: [owner.email, email],
+      html: html,
+      subject: "Order confirmed",
+      reply_to: owner.email,
+    });
+
+    console.log('email sent successfully.');
+    return res.send({
+      status: 200,
+      message: "email sent done.",
+      success: true,
+    });
+  } catch (error) {
+
+    console.log('email sent failed!!!');
+    return res.send({
+      status: 200,
+      error: error,
+      message: "email not sent",
+      success: false,
+    });
+  }
+})
 
 /* publicEnd */
 
@@ -292,9 +336,6 @@ app.get("/useCoupons/:id", async (req, res) => {
   }
 });
 
-//--------------------------------------
-//sending mail
-app.post("/sendMail", sendMail);
 
 // -----------------------------
 /* adminEnd */
