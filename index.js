@@ -1,4 +1,5 @@
 const express = require("express");
+require('dotenv').config()
 
 const fs = require("fs")
 const app = express();
@@ -6,20 +7,22 @@ const cors = require("cors");
 const multer = require("multer");
 const Resend = require('resend').Resend;
 
-// const baseURL = "http://localhost:8000";
 const baseURL = "https://server.owldaccabd.com";
 // const corsOption = {
 //   origin: ["https://owldaccabd.com"],
 // };
 // app.use(cors(corsOption));
+
 app.use(cors());
+app.use(express.json());
+
 const admin = require("firebase-admin");
 const credentials = require("./key.json");
+const generateAnEmail = require("./generator/generateAnaemail");
 admin.initializeApp({
   credential: admin.credential.cert(credentials),
 });
 const db = admin.firestore();
-app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/images", express.static("assets/images"));
 
@@ -28,20 +31,24 @@ app.use("/images", express.static("assets/images"));
 //--------------------------------------
 //sending mail
 
-// const resend = new Resend('re_GeB9ZW8z_LrbmCRakt9JueqNzkMHTw1Vg');
-const resend = new Resend('re_R8YPDWtk_6s5dGVUQ4c7B45uEFZw732ah');
-
+const resend = new Resend("re_R8YPDWtk_6s5dGVUQ4c7B45uEFZw732ah");
 app.post("/sendMail", async (req, res) => {
 
-  const { email, html } = req.body;
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Headers", "*");
+
+
+  const { email, emailObj } = req.body;
+
   const owner = {
     email: "owldacca@gmail.com",
     name: "Owl DaccaBD"
   }
+  const html = generateAnEmail(emailObj);
 
   try {
     const data = await resend.emails.send({
-      from: 'Owldacca - Noreply <onboarding@resend.dev>',
+      from: 'Owldacca - Noreply <order@server.owldaccabd.com>',
       to: [owner.email, email],
       html: html,
       subject: "Order confirmed",
@@ -64,6 +71,7 @@ app.post("/sendMail", async (req, res) => {
       success: false,
     });
   }
+
 })
 
 /* publicEnd */
