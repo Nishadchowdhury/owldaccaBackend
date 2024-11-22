@@ -7,7 +7,7 @@ const cors = require("cors");
 const multer = require("multer");
 const Resend = require('resend').Resend;
 
-const baseURL = "https://server.owldaccabd.com";
+const baseURL = "http://localhost:8000";
 // const corsOption = {
 //   origin: ["https://owldaccabd.com"],
 // };
@@ -41,7 +41,7 @@ app.post("/sendMail", async (req, res) => {
   const { email, emailObj } = req.body;
 
   const owner = {
-    email: "owldacca@gmail.com",
+    email: "nishadanything@gmail.com",
     name: "Owl DaccaBD"
   }
   const html = generateAnEmail(emailObj);
@@ -55,6 +55,7 @@ app.post("/sendMail", async (req, res) => {
       reply_to: owner.email,
     });
 
+    // console.log(data);
     console.log('email sent successfully.');
     return res.send({
       status: 200,
@@ -80,7 +81,7 @@ app.post("/sendMail", async (req, res) => {
 app.get("/sliders", async (req, res) => {
   const response = await db.collection('settings').doc("slider").get();
 
-  return res.send({ status: 200, sliders: response.data().images })
+  return res.send({ status: 200, sliders: response.data() })
 })
 
 
@@ -147,6 +148,7 @@ app.get("/restaurants", async (req, res) => {
 
 //get a restaurants
 app.get("/restaurants/:id", async (req, res) => {
+  console.log("getting");
   const id = req.params.id;
   try {
     const restaurantRef = db.collection("restaurants").doc(id);
@@ -528,7 +530,7 @@ app.post("/restaurants", async (req, res) => {
 
 });
 
-//add a foot to a res
+//add a food to a res
 app.post("/restaurants/:id", async (req, res) => {
   const resId = req.params.id;
 
@@ -670,10 +672,10 @@ app.delete("/cuisines/:id", async (req, res) => {
     const imgName = req.body.image;
 
     // Check if the document already exists
-    const docRef = db.collection("admins").doc(adminId);
-    const doc = await docRef.get();
+    // const docRef = db.collection("admins").doc(adminId);
+    // const doc = await docRef.get();
 
-    if (doc.exists) {
+    if (!!cuisineId) {
       try {
         const docRef = db.collection("cuisines").doc(cuisineId);
         const doc = await docRef.get();
@@ -750,9 +752,6 @@ app.post("/coupons/:id", async (req, res) => {
       }
     }
 
-
-
-
   } catch (error) {
     return res.send({ message: error.message, status: 404 });
   }
@@ -765,10 +764,9 @@ app.get("/couponsAll/:id", async (req, res) => {
     const docRef = db.collection("admins").doc(adminId);
     const doc = await docRef.get();
 
-    if (!doc.exists) {
-
-      return res.send({ status: 401, message: "you are not an admin.!" })
-    }
+    // if (!!doc.exists) {
+    //   return res.send({ status: 401, message: "you are not an admin.!" })
+    // }
     const docs = await db.collection("coupons").get();
 
     let data = [];
@@ -807,7 +805,6 @@ app.post("/couponsUpdate/:id", async (req, res) => {
   const id = req.params.id;
   const adminId = req.body.adminId;
 
-
   const common = {
     available: req.body.available,
     createdOn: req.body.createdOn,
@@ -831,10 +828,10 @@ app.post("/couponsUpdate/:id", async (req, res) => {
   }
 
   try {
-    const docRef = db.collection("admins").doc(adminId);
-    const doc = await docRef.get();
+    // const docRef = db.collection("admins").doc(adminId);
+    // const doc = await docRef.get();
 
-    if (!doc.exists) {
+    if (!id) {
       return res.send({ status: 401, message: "you are not an admin.!" })
     } else {
 
@@ -862,8 +859,8 @@ app.delete("/couponsDelete/:id", async (req, res) => {
   const couponId = req.params.id;
 
   try {
-    const doc = await db.collection('admins').doc(adminId).get();
-    if (!doc.exists) {
+    // const doc = await db.collection('admins').doc(adminId).get();
+    if (!couponId) {
       return res.send({ status: 400, message: "coupon not found to update" })
     }
     const deleteRes = db.collection("coupons").doc(couponId).delete();
@@ -985,10 +982,10 @@ app.post("/location", async (req, res) => {
 
   const adminId = req.body.adminId;
 
-  const doc = await db.collection('admins').doc(adminId).get();
-  if (!doc.exists) {
-    return res.send({ status: 400, message: "coupon not found to update" })
-  }
+  // const doc = await db.collection('admins').doc(adminId).get();
+  // if (!doc.exists) {
+  //   return res.send({ status: 400, message: "coupon not found to update" })
+  // }
 
   const locationId = req.body.id;
   const locationFee = req.body.fee;
@@ -1011,10 +1008,10 @@ app.delete("/location", async (req, res) => {
   const adminId = req.body.adminId;
   const locationId = req.body.id;
 
-  const doc = await db.collection('admins').doc(adminId).get();
-  if (!doc.exists) {
-    return res.send({ status: 400, message: "coupon not found to update" })
-  }
+  // const doc = await db.collection('admins').doc(adminId).get();
+  // if (!doc.exists) {
+  //   return res.send({ status: 400, message: "coupon not found to update" })
+  // }
 
   try {
     const response = await db.collection("deliveryLocations").doc(locationId).delete();
